@@ -6,7 +6,7 @@ const execAsync = promisify(exec);
 
 module.exports = async (req, res) => {
   try {
-    const phpScriptPath = "../index.php"; // Ensure this path is correct relative to the function's location
+    const phpScriptPath = "../";
     try {
       const { stdout } = await execAsync(`php ${phpScriptPath}`);
       res.status(200).send(stdout);
