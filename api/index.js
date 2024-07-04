@@ -1,20 +1,22 @@
+const { join } = require("path");
+const { promisify } = require("util");
 const { exec } = require("child_process");
 
-module.exports = async (req, res) => {
-  const phpScriptPath = "../index.php";
-  try {
-    const result = await new Promise((resolve, reject) => {
-      exec(`php ${phpScriptPath}`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          return reject(error);
-        }
-        resolve(stdout ? stdout : stderr);
-      });
-    });
+const execAsync = promisify(exec);
 
-    res.status(200).send(result);
+module.exports = async (req, res) => {
+  try {
+    if (req.url === "/") {
+      const filePath = join(__dirname, "..", "public", "index.php");
+      const fileContents = fs.readFileSync(filePath, "utf8");
+      res.setHeader("Content-Type", "text/html");
+      res.end(fileContents);
+    } else {
+      const phpScriptPath = "../index.php";
+      const { stdout } = await execAsync(`php ${phpScriptPath}`);
+      res.status(200).send(stdout);
+    }
   } catch (error) {
-    res.status(500).send({ error: "Failed to execute PHP script" });
+    res.status(500).send({ error: "Failed to serve the page" });
   }
 };
